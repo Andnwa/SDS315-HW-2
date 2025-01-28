@@ -1,0 +1,365 @@
+---
+title: "HW2"
+author: "Andrea Nwaokolo (acn987)"
+date: "2025-01-25"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    collapsed: false
+    
+ 
+---
+
+This the my [GitHuB](https://github.com/Andnwa/SDS315-HW-2)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(xfun)
+profs <- read.csv('profs.csv')
+metro <- read.csv('capmetro_UT.csv')
+bike <-  read.csv('bikeshare.csv')
+billboard <- read.csv('billboard.csv')
+```
+
+## Question One: Beauty, or not, in the classroom
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#A 
+
+#histogram
+ggplot(data = profs) + geom_histogram(aes(x = eval), bins = 30, color = "black") + labs(title = "Distribution of Teaching Score Evaluation", x = "Scores")
+
+
+#summary stats
+summary(profs$eval)
+```
+
+
+The histogram of professors' average teaching evaluation scores shows a bimodal distribution, with a left skew. The median score is 3.998, indicating that half of the professors received a score above 3.998 and half received a score below it. The range of scores spans from 2.1 to 5, with an interquartile range (IQR) of 0.8. The graph being  skewed to the left suggests that a higher concentration of professors with high evaluation scores, while a few professors have significantly lower scores.
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#B
+# box plot
+ggplot(data = profs) + geom_boxplot(aes(x = native, y = eval, fill = native)) + labs(title = "Distribution of Teaching Score Evaluation: Native vs. Non-Native English Speakers", x = "Evaluation Scores")
+
+library(dplyr)
+
+# summary statistics 
+ profs %>%
+  group_by(native) %>%
+  summarise(
+    min_score = min(eval, na.rm = TRUE),
+    q1 = quantile(eval, 0.25, na.rm = TRUE),
+    median_score = median(eval, na.rm = TRUE),
+    mean_score = mean(eval, na.rm = TRUE),
+    q3 = quantile(eval, 0.75, na.rm = TRUE),
+    max_score = max(eval, na.rm = TRUE),
+    iqr = IQR(eval, na.rm = TRUE),
+    n = n()  
+  )
+
+
+
+
+
+```
+
+
+
+The graph shows two boxplots that compare the distribution of evaluation scores from professors who are native English speakers versus professors who are non-native speakers. The boxplot representing native speakers has a range of scores that spans from 2.1 to 5.0, with a median of 4.0. The interquartile range (IQR) for native speakers is 0.7. Additionally, there are outliers visible above the upper whisker, suggesting that a few professors have unusually high evaluation scores. In contrast, the boxplot for non-native speakers has a range of 2.7 to 4.0 and a median of 3.6, which is lower than the median for native speakers. The IQR for non-native speakers is also 0.7. However, unlike the native speakers, there are no outliers for non-native speakers. Another notable difference is the sample size: the group of 28 non-native speakers is much smaller than the group of 435 native speakers, which contributes to the narrower range of scores for non-native speakers. Overall, the boxplots reveal that native English speakers have a wider distribution of evaluation scores, with a higher median and visible outliers, while non-native speakers show a more concentrated distribution with no outliers and a lower median. 
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#C 
+
+# histogram
+ggplot(data = profs) + geom_histogram(aes(x = eval, fill = factor(gender)), bins = 30, color = "black") + labs(title = "Distribution of Teaching Score Evaluation: Male vs. Female", x = "Evaluation Scores") + facet_wrap(~gender, nrow = 2)
+
+#summary stats
+profs %>%
+  group_by(gender) %>%
+  summarise(
+    Min = min(eval, na.rm = TRUE),
+    Max = max(eval, na.rm = TRUE),
+    Median = median(eval, na.rm = TRUE),
+    Mean = mean(eval, na.rm = TRUE),
+    IQR = IQR(eval, na.rm = TRUE),
+    Q1 = quantile(eval, 0.25, na.rm = TRUE),
+    Q3 = quantile(eval, 0.75, na.rm = TRUE),
+    SD = sd(eval, na.rm = TRUE)
+  )
+
+```
+
+
+
+The graph above shows two histograms showing the distribution of teaching evaluation scores, separated by gender. For female professors, the distribution appears unimodal with a left skew, ranging from 2.3 to 4.9. The median score for female professors is 3.90, and the interquartile range (IQR) is 0.7. This left-skewed distribution suggests that more female professors tend to receive higher scores, with a concentration of evaluations around the upper end of the scale. For male professors, the distribution is also left-skewed, ranging from 2.1 to 5.0. The median score for male professors is 4.07, and the IQR is 0.8, which is slightly wider than that of female professors. Male professors, on average, receive higher evaluation scores than their female counterparts, and their scores have a greater range, indicating more variability in the evaluations.
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#D
+
+# scatter plot
+ggplot(data = profs) + geom_point(aes(x = beauty, y = eval)) + labs(title = "Relationship Between the Professor's Attractiveness and their Course Evaluation", x = "Average Rating of Physical Attractiveness", y = "Evaluation Scores" )
+
+cor(profs$beauty, profs$eval)
+```
+
+
+
+The graph above is a scatter plot that shows the relationship between a professors attractiveness rating and the evaluation scores. A professors' attractiveness is rated by a panel of six. The correlation of this graph is 0.19 which mean there is a weak positive relationship between between a professors attractiveness rating and their evaluation scores.
+
+<br>
+<br>
+
+
+## Question Two: Bike sharing
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#A
+
+#finding average bike rental for each hour
+avg_bike <- bike %>%
+  group_by(hr) %>%
+  summarise(avg_total = mean(total, na.rm = TRUE))
+
+#line graph  
+ggplot(data = avg_bike) + geom_line(aes(x = hr, y = avg_total)) + labs(title = "Average Hourly Bike Rentals Across All Hours of the Day", x = "Hour of the Day", y = " Total Bike Rentals")
+
+#summary stats
+summary(avg_bike$avg_total)
+sd(avg_bike$avg_total)
+```
+
+
+
+The graph above shows the relationship between the hour of the day (grouped in 5-hour intervals) and the average hourly bike rentals (grouped in increments of 100). The data shows a maximum rental count of 461.45, a minimum of 6.35, and a median of 210.10. The standard deviation is 131.47, indicating significant variability in bike rentals throughout the day. Notably, there is an increase in average rentals during the hours of 5-8 AM, 10-12 PM, and 3-5 PM. The highest number of bike rentals occurs around the 17th hour (5 PM), suggesting peak demand during late afternoon.
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#B
+
+# faceted line graph
+avg_bike <- bike %>%
+  group_by(hr, workingday) %>%
+  summarise(avg_total = mean(total, na.rm = TRUE), .groups = "drop")
+
+ggplot(data = avg_bike) + geom_line(aes(x = hr, y = avg_total, color = factor(workingday))) + labs(title = "Average Hourly Bike Rentals Across All Hours of the Day: Workdays vs. Non-workdays", x = "Hour of the Day", y = " Total Bike Rentals") + facet_wrap(~workingday)
+
+#summary stats
+avg_bike %>%
+  group_by(workingday) %>%
+  summarise(
+    Min = min(avg_total),
+    Max = max(avg_total),
+    Mean = mean(avg_total),
+    Median = median(avg_total),
+    SD = sd(avg_total) )
+
+```
+
+
+
+The two line graphs above show the relationship between the hour of the day (grouped in 5-hour intervals) and the average hourly bike rentals (grouped in increments of 100), separated by whether it is a workday (1) or a weekend/holiday (0).For workdays, the maximum number of rentals is 525.29, with a standard deviation of 153.94 and a median of 184.92. For non-workdays (weekends/holidays), the maximum number of rentals is 372.73, with a standard deviation of 133.32 and a median of 156.84.On average, there were more bike rentals during workdays than during non-workdays. 
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+
+#C
+
+# faceted bar graph
+bike_9am <- bike %>%
+  filter(hr == 9)
+
+avg_9am <- bike_9am %>%
+  group_by(weathersit, workingday) %>%
+  summarise(avg_ride = mean(total, na.rm = TRUE), .groups = "drop")
+
+ggplot(data = avg_9am) + geom_bar(aes(x = weathersit, y = avg_ride, fill = factor(workingday)), stat = "identity") + labs(title = "Average Ridership During 9 AM by Weather Situation", x = "Weather Situations", y = " Total Bike Rentals") + facet_wrap(~workingday)
+
+#summary stats 
+table(avg_9am$weathersit, avg_9am$workingday)
+
+```
+
+
+The two bar graphs above show the relationship between the average ridership (in increments of 50) at 9 AM based on different weather situations:
+
+1: Clear, Few clouds, Partly cloudy
+2: Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds
+3: Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
+4: Heavy Rain + Ice Pellets + Thunderstorm + Mist, Snow + Fog
+
+At 9 AM, there are no observed cases of weather situation 4.The graphs compare ridership for workdays (1) and non-workdays (0). From the graphs, we can observe that the highest ridership occurs during weather situation 1 (clear, few clouds, partly cloudy) for both workdays and non-workdays. On the other hand, the lowest ridership is observed during weather situation 3 (light snow, light rain, thunderstorm).Overall, the average ridership at 9 AM is higher when it is clear outside (situation 1), followed by when it is misty (situation 2), with a notable drop in ridership during the snow and heavy rain conditions (situation 3 and 4). 
+
+<br>
+<br>
+
+
+
+## Question Three: Capital Metro UT Ridership
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#A
+
+avg_board_data <- metro %>%
+  group_by(hour_of_day, day_of_week, month) %>%
+  summarise(avg_board = mean(boarding, na.rm = TRUE), .groups = "drop")
+
+capmetro_UT <-  mutate(avg_board_data,
+              day_of_week = factor(day_of_week,
+              levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat", "Sun")),
+              month = factor(month,
+              levels=c("Sep", "Oct","Nov")))
+
+ggplot(data = capmetro_UT) + geom_line(aes(x = hour_of_day, y = avg_board, color =  factor(month), group = month)) + labs(title = "Average Hourly Boardings by Month and Day of the Week", x = "Hour of the Day", y = "Average Boardings") + facet_wrap(~day_of_week)
+```
+
+
+The line graphs above show the average boardings (in increments of 50 people) onto a UT metro bus depending on the hour of the day (in increments of 5 hours) for all seven days of the week. Each graph features three lines, representing the months of September, October, and November.The graphs reveal that the peak boarding times for Monday through Friday are relatively consistent, occurring around 3:00 PM to 4:00 PM. However, the peak boarding times for Saturdays and Sundays are slightly different. In September, Mondays show a noticeable dip in boardings compared to other days and months. This could be due to students still adjusting to their schedules at the start of the school year, which may result in fewer people taking the bus on Mondays, especially at the beginning of the week. In November, the weather becomes colder, and there’s also the potential impact of the holiday season. This combination of factors likely leads to lower boardings on Wednesdays, Thursdays, and Fridays, as people may take time off during the holiday period.
+
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+
+#B
+
+#faceted scatter plot
+ggplot(data = metro) + geom_point(aes(x = temperature, y = boarding, color = factor(weekend))) + labs(title = "Impact of Temperature on Boardings by Hour and Weekend Status", x = "Temperature", y = "Number of Boardings" ) + facet_wrap(~hour_of_day)
+
+ metro %>%
+  group_by(weekend) %>%
+  summarise(correlation = cor(temperature, boarding, use = "complete.obs"))
+
+```
+
+The graph above shows the relationship between the number of boarding (people) and the temperature (Fahrenheit) across all hours of the day. The points that are weekdays and weekends are differentiated by color. When we hold hour of day and weekend status constant, the plot shows that temperature does not appear to have a strong, consistent effect on the number of bus boardings. In some hours, there may be slight increases or decreases in boardings as the temperature changes, but these patterns are not consistent across all hours. 
+
+<br>
+<br>
+
+
+
+## Question Four: Wrangling the Billboard Top 100
+
+<br>
+
+##### Top 10 Songs by Weeks on the Billboard Top 100 Chart
+```{r, echo=FALSE, warning=FALSE}
+#A
+billboard %>%
+  group_by(performer, song) %>%
+  summarise(weeks_on_chart = n(), .groups = "drop") %>%
+  arrange(desc(weeks_on_chart)) %>%
+  head(10)
+
+```
+
+
+Above is a table of the top 10 most popular songs from 1958 to 2022, ranked by the number of weeks they spent on the Billboard Top 100 chart. The table includes the performer, song title, and the total number of weeks each song remained on the chart.
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#B
+better_bill <- billboard %>%
+  filter(year != 1958 & year != 2021)
+
+ better_bill %>%
+  mutate(year = as.integer(year)) %>%  
+  group_by(year, song) %>%
+  summarise(count = n(), .groups = "drop") %>%  
+  arrange(desc(count)) 
+ 
+
+freq_bill <- better_bill %>%
+group_by(year) %>%
+summarise(unique_song_count = n_distinct(song), .groups = "drop") 
+
+ggplot(data = freq_bill) + geom_line(aes(x = year, y = unique_song_count)) + labs(title = "Yearly Count of Unique Songs in the Billboard Top 100", x = "Year", y = "Number of Unique Songs") 
+
+#summary stats
+freq_bill %>%
+  summarise(
+    mean_songs = mean(unique_song_count, na.rm = TRUE),
+    median_songs = median(unique_song_count, na.rm = TRUE),
+    min_songs = min(unique_song_count, na.rm = TRUE),
+    max_songs = max(unique_song_count, na.rm = TRUE),
+    sd_songs = sd(unique_song_count, na.rm = TRUE)
+  )
+
+
+```
+
+The line graph above shows the trend in the number of unique songs appearing on the Billboard Top 100 chart each year from 1958 to 2021. It shows that the maximum number of unique songs in a single year was 803, while the median number of unique songs across the years was 525.5. This suggests fluctuations in the diversity of songs making the Top 100, possibly reflecting changing trends in the music industry over time.
+
+<br>
+
+
+
+```{r, echo=FALSE, results='hide', warning=FALSE}
+#C
+song_week_counts <- billboard %>%
+  group_by(performer, song) %>%
+  summarise(week_count = n(), .groups = "drop") %>%
+  filter(week_count >= 10) 
+
+ ten_week_hits_per_artist <- song_week_counts %>%
+  group_by(performer) %>%
+  summarise(ten_week_hits = n(), .groups = "drop") %>%
+  filter(ten_week_hits >= 30)
+
+ggplot(data = ten_week_hits_per_artist) + geom_bar(aes(x = performer, y = ten_week_hits), color = "black",fill = "#577dc9",  stat = "identity") + labs(title = "Top 19 Artists with the Most Ten-Week Hits", x = "Artist", y = " Total Number of Ten-Week Hits ") + coord_flip()
+ 
+
+ten_week_hits_per_artist %>%
+  summarise(
+    mean_hits = mean(ten_week_hits),
+    median_hits = median(ten_week_hits),
+    min_hits = min(ten_week_hits),
+    max_hits = max(ten_week_hits),
+    sd_hits = sd(ten_week_hits),
+    count = n()
+  )
+
+```
+
+The histogram above shows the 19 artists who have had at least 30 songs that appeared in the Billboard Top 100 for at least 10 weeks, which are defined as "ten-week hits." Each bar represents an artist, with the height indicating the total number of such hits. The graph highlights that Elton John has the most ten-week hits, followed closely by Madonna. 
+
+
+
+
+
+
+
+
+
+
+
+
